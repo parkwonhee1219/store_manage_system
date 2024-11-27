@@ -1,10 +1,13 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:store_management_system/calendar.dart';
 import 'package:store_management_system/gpio.dart';
 
-
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ko_KR', null); // 한국어 로케일 초기화
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 

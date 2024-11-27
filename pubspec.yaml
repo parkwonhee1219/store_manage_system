@@ -43,6 +43,7 @@ dependencies:
   table_calendar: ^3.1.2
   google_fonts: ^6.2.1
   intl: ^0.19.0
+  flutter_launcher_icons: ^0.14.1
 
 dev_dependencies:
   flutter_test:
@@ -67,8 +68,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/store.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -96,3 +97,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: "laucher_icon"
+  ios: true
+  image_path: "assets/store.png"
+  adaptive_icon_background: "#FFFFFFFF"
+  adaptive_icon_foreground: "assets/icon-foreground-432x432.png" 
+  remove_alpha_ios: true
