@@ -10,19 +10,21 @@ class GpioScreen extends StatefulWidget {
 class _GpioScreenState extends State<GpioScreen> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Gpio',
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('장치 제어'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            SizedBox(width: 5), // 제목 앞의 여백
+            Text('Gpio'),
+          ],
         ),
-        body: Center(
-          child: Text(
-            'Gpio',
-            style: TextStyle(
-              fontSize: 24, // 글자 크기
-              fontWeight: FontWeight.bold, // 글자 두께
-            ),
+      ),
+      body: Center(
+        child: Text(
+          'Gpio',
+          style: TextStyle(
+            fontSize: 24, // 글자 크기
+            fontWeight: FontWeight.bold, // 글자 두께
           ),
         ),
       ),

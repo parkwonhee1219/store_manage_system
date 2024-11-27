@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:store_management_system/worker.dart';
+import 'package:provider/provider.dart';
+import 'package:store_management_system/worker_screen.dart';
+import 'package:store_management_system/workers.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class Event {
-  //event 저장을 위한 class
+  //각 evnet 객체 class
   final String name;
   final DateTime startTime;
   final DateTime endTime;
@@ -62,6 +64,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       print(events);
     });
   }
+
   List<Event> _getEventsForDay(DateTime day) {
     return events[day] ?? []; // 해당 날짜의 이벤트 반환
   }
@@ -82,7 +85,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         context, MaterialPageRoute(builder: (context) => WorkerManage()));
   }
 
-   void _showAddDialog() {
+  void _showAddDialog() {
     // 다이얼로그를 통해 이벤트 추가
     showDialog(
         context: context,
@@ -123,132 +126,176 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final workerModel =
+        Provider.of<WorkerModel>(context); // WorkerModel 인스턴스 가져오기
     return Scaffold(
-        appBar: AppBar(
-          title: Text('알바생 근태관리'),
-          actions: [
-            IconButton(
-                onPressed: _onPersonIconPressed, icon: Icon(Icons.person)),
-          ],
-        ),
-        body: Column(
+      appBar: AppBar(
+        title: Row(
           children: [
-            TableCalendar(
-              focusedDay: _focusedDay,
-              firstDay: DateTime(2020),
-              lastDay: DateTime(2030),
-              daysOfWeekHeight: 30,
-              locale: 'ko-KR',
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: _onDaySelected,
-              calendarFormat: _calendarFormat,
-              onFormatChanged: (format) {
-                if (_calendarFormat != format) {
-                  setState(() {
-                    _calendarFormat = format;
-                  });
-                }
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-              },
-              // 이벤트 표시를 위한 eventLoader 추가
-              eventLoader: (day) {
-                return _getEventsForDay(day); // 각 날짜에 대한 이벤트 반환
-              },
-              // 이벤트 표시를 위한 calendarBuilders 추가
-              calendarBuilders: CalendarBuilders(
-                markerBuilder: (context, date, events) {
-                  print('okokok');
-                  print(events);
-                  if (events.isNotEmpty) {
-                    print('NOT EMPTY!!!!');
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: events.asMap().entries.map((entry) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                          child: Container(
-                            width: 7.0,
-                            height: 7.0,
-                            decoration: const BoxDecoration(
-                              color: Color.fromARGB(255, 252, 6, 84),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    );
-                  }
-                  return const SizedBox();
-                },
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.fromLTRB(20, 10, 16, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                      DateFormat('yyyy.MM.dd', 'ko')
-                          .format(_selectedDay)
-                          .toString(),
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          height: 2.0)),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _selectedEvents.length,
-                itemBuilder: (context, index) {
-                  final event = _selectedEvents[index];
-                  return Container(
-                    margin: EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16.0), // 마진 추가
-                    decoration: BoxDecoration(
-                      color: Colors.transparent, // 배경색
-                      border: Border.all(color: Colors.black), // 검정색 테두리
-                      borderRadius: BorderRadius.circular(10.0), // 라운딩 처리
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0), // 아이콘 주변 패딩
-                          child: Icon(Icons.person,
-                              size: 40.0, color: Colors.black), // 사람 아이콘
-                        ),
-                        Expanded(
-                          child: ListTile(
-                            title: Text(event.name,
-                                style: TextStyle(fontSize: 16)),
-                            subtitle: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start, // 텍스트 정렬
-                              children: [
-                                Text(
-                                  '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}',
-                                ),
-                                // 추가적인 텍스트
-                                Text('출퇴근 : '),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+            SizedBox(width: 5), // 제목 앞의 여백
+            Text('Calendar'),
           ],
         ),
-        floatingActionButton: FloatingActionButton(onPressed: _showAddDialog,
-        child: Icon(Icons.add),),
-        );
+        actions: [
+          IconButton(
+              onPressed: _onPersonIconPressed,
+              icon: Icon(
+                Icons.person,
+                color: Colors.black,
+                size: 30,
+              )),
+          SizedBox(
+            width: 17,
+          )
+        ],
+      ),
+      body: Column(
+        children: [
+          TableCalendar(
+            focusedDay: _focusedDay,
+            firstDay: DateTime(2020),
+            lastDay: DateTime(2030),
+            daysOfWeekHeight: 30,
+            locale: 'ko-KR',
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: _onDaySelected,
+            calendarFormat: _calendarFormat,
+            onFormatChanged: (format) {
+              if (_calendarFormat != format) {
+                setState(() {
+                  _calendarFormat = format;
+                });
+              }
+            },
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
+            },
+            calendarStyle: CalendarStyle(
+              selectedDecoration: BoxDecoration(
+                color: Color.fromARGB(255, 231, 109, 109), // 선택된 날짜의 동그라미 색상
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: Color.fromARGB(255, 245, 157, 157), // 오늘 날짜의 동그라미 색상
+                shape: BoxShape.circle,
+              ),
+            ),
+            // 이벤트 표시를 위한 eventLoader 추가
+            eventLoader: (day) {
+              return _getEventsForDay(day); // 각 날짜에 대한 이벤트 반환
+            },
+            // 이벤트 표시를 위한 calendarBuilders 추가
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: (context, date, events) {
+                if (events.isNotEmpty) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: events.asMap().entries.map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                        child: Container(
+                          width: 7.0,
+                          height: 7.0,
+                          decoration: const BoxDecoration(
+                            color: Color.fromARGB(255, 47, 113, 77),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                }
+                return const SizedBox();
+              },
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.fromLTRB(20, 10, 16, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                    DateFormat('yyyy.MM.dd', 'ko')
+                        .format(_selectedDay)
+                        .toString(),
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        height: 2.0)),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _selectedEvents.length,
+              itemBuilder: (context, index) {
+                final event = _selectedEvents[index];
+
+                // event.name에 해당하는 Worker 객체 찾기
+                // event.name에 해당하는 Worker 객체 찾기
+                final worker = workerModel.workersList.firstWhere(
+                  (worker) => worker.name == event.name,
+                  orElse: () => Worker(
+                      name: 'Unknown',
+                      fixedWorkHours: [],
+                      monthlyHours: 0,
+                      hourlyRate: 0,
+                      duty33: false,
+                      gender: ''), // 기본 Worker 객체 반환
+                );
+
+                // 성별에 따라 아이콘 색상 설정
+                Color iconColor = worker.gender == '여'
+                    ? Color.fromARGB(255, 231, 109, 109)
+                    : Color.fromARGB(255, 47, 113, 77);
+
+                return Container(
+                  margin: EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 16.0), // 마진 추가
+                  decoration: BoxDecoration(
+                    color: Colors.transparent, // 배경색
+                    border: Border.all(color: Colors.black), // 검정색 테두리
+                    borderRadius: BorderRadius.circular(10.0), // 라운딩 처리
+                  ),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0), // 아이콘 주변 패딩
+                        child: Icon(Icons.person,
+                            size: 40.0,
+                            color: iconColor), // 사람 아이콘
+                      ),
+                      Expanded(
+                        child: ListTile(
+                          title:
+                              Text(event.name, style: TextStyle(fontSize: 16)),
+                          subtitle: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start, // 텍스트 정렬
+                            children: [
+                              Text(
+                                '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}',
+                              ),
+                              // 추가적인 텍스트
+                              Text('출퇴근 : '),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddDialog,
+        child: Icon(Icons.add),
+      ),
+    );
   }
 }
