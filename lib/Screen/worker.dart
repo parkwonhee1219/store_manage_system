@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:store_management_system/Dialog/addWorkerDialog.dart';
+import 'package:store_management_system/Firebase/calendar_events.dart';
 import 'package:store_management_system/Firebase/workers.dart';
 
 class WorkerManage extends StatefulWidget {
@@ -45,7 +46,8 @@ class _WorkerManageState extends State<WorkerManage> {
                   title: Text('${data['name']}'), // 근무자 이름 표시
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start, // 좌측 정렬
-                    children: List.generate(data['fixedWorkHours'].length, (dayIndex) {
+                    children: List.generate(data['fixedWorkHours'].length,
+                        (dayIndex) {
                       // 각 고정 근무 시간에 대해 Text 위젯 생성
                       final workHour = data['fixedWorkHours'][dayIndex];
                       return Text(
@@ -66,8 +68,9 @@ class _WorkerManageState extends State<WorkerManage> {
                       ),
                       IconButton(
                         icon: Icon(Icons.delete), // 삭제 아이콘
-                        onPressed: () {
+                        onPressed: () async{
                           // 삭제 버튼 클릭 시의 동작 정의
+                          await deleteAllEvents(data['name']);
                           fireStoreWorkers.deleteWorker(documentSnapshot.id);
                         },
                       ),
@@ -85,7 +88,7 @@ class _WorkerManageState extends State<WorkerManage> {
         padding:
             const EdgeInsets.only(bottom: 50.0, right: 0.0), // 아래와 오른쪽 여백 추가
         child: FloatingActionButton(
-          onPressed: () async {
+          onPressed: () {
             addWorkerDialog(context);
           },
           child: Icon(Icons.add), // 더하기 아이콘
@@ -95,9 +98,10 @@ class _WorkerManageState extends State<WorkerManage> {
     );
   }
 
-  void showSalaryDialog(BuildContext context, Map<String,dynamic> data) {
+  void showSalaryDialog(BuildContext context, Map<String, dynamic> data) {
     int month = DateTime.now().month;
-    double SalaryNo33 = (double.parse(data['monthlyHours'])) * (data['hourlyRate']);
+    double SalaryNo33 =
+        (double.parse(data['monthlyHours'])) * (data['hourlyRate']);
     double SalaryYes33 = SalaryNo33 - ((SalaryNo33) * (3.3 / 100));
     // 금액 형식화
     String formattedSalaryNo33 = NumberFormat('#,###,##0원').format(SalaryNo33);
@@ -136,4 +140,30 @@ class _WorkerManageState extends State<WorkerManage> {
       },
     );
   }
+
+  Future<void> deleteAllEvents(String workerName) async {
+  final FireStoreCalendar fireStoreCalendar = FireStoreCalendar();
+  WriteBatch batch = FirebaseFirestore.instance.batch(); // Batch 객체 생성
+
+  // 해당 이름을 가진 모든 이벤트를 쿼리
+  QuerySnapshot querySnapshot = await fireStoreCalendar.product
+      .where('name', isEqualTo: workerName)
+      .get();
+
+  // 각 문서를 삭제를 배치에 추가
+  for (var doc in querySnapshot.docs) {
+    batch.delete(fireStoreCalendar.product.doc(doc.id)); // 삭제 작업 추가
+  }
+
+  // 배치 작업 커밋
+  await batch.commit();
+
+  // 삭제 알림
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text("$workerName의 모든 이벤트가 삭제되었습니다."),
+    ),
+  );
+}
+
 }

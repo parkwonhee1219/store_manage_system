@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:store_management_system/Firebase/calendar_events.dart';
 import 'package:store_management_system/Firebase/workers.dart';
 
 Future<void> addWorkerDialog(BuildContext context) async {
   FireStoreWorkers fireStoreWorkers = FireStoreWorkers(); // add 함수를 위한 인스턴스 생성
+  FireStoreCalendar fireStoreCalendar = FireStoreCalendar();
 
   final nameController = TextEditingController();
   final hourlyRateController = TextEditingController();
@@ -95,7 +98,10 @@ Future<void> addWorkerDialog(BuildContext context) async {
                             color: Color(0xFFD62B2B),
                           ),
                         ),
-                        Text(' - ',style: TextStyle(color: Color(0xFFD62B2B)),),
+                        Text(
+                          ' - ',
+                          style: TextStyle(color: Color(0xFFD62B2B)),
+                        ),
                         Text(
                           entry.endTime ?? '00:00',
                           style: TextStyle(
@@ -280,6 +286,9 @@ Future<void> addWorkerDialog(BuildContext context) async {
             onPressed: () async {
               final name = nameController.text;
               final hourlyRate = int.tryParse(hourlyRateController.text) ?? 0;
+              DateTime now = DateTime.now();
+              DateTime firstDay = DateTime(now.year, now.month, 1);
+              DateTime nextFirstDay = DateTime(now.year, now.month + 1, 1);
 
               // Worker 객체 생성
               Worker newWorker = Worker(
@@ -293,8 +302,67 @@ Future<void> addWorkerDialog(BuildContext context) async {
 
               // Worker 추가
               await fireStoreWorkers.addWorker(newWorker);
-            
+
+              // Firestore Batch Writes 사용
+              WriteBatch batch = FirebaseFirestore.instance.batch();
+
+              // 근무시간을 기반으로 이벤트 추가
+              for (var workHour in fixedWorkHours) {
+                // 선택한 요일을 숫자로 매핑
+                int dayOfWeek = workHour.day == '월요일'
+                    ? DateTime.monday
+                    : workHour.day == '화요일'
+                        ? DateTime.tuesday
+                        : workHour.day == '수요일'
+                            ? DateTime.wednesday
+                            : workHour.day == '목요일'
+                                ? DateTime.thursday
+                                : workHour.day == '금요일'
+                                    ? DateTime.friday
+                                    : workHour.day == '토요일'
+                                        ? DateTime.saturday
+                                        : workHour.day == '일요일'
+                                            ? DateTime.sunday
+                                            : 0;
+
+                for (DateTime date = firstDay;
+                    date.isBefore(nextFirstDay);
+                    date = date.add(Duration(days: 1))) {
+                  if (date.weekday == dayOfWeek) {
+                    // 이벤트 시작 및 종료 시간 설정
+                    Timestamp startTime = Timestamp.fromDate(DateTime(
+                      date.year,
+                      date.month,
+                      date.day,
+                      int.parse(workHour.startTime?.split(':')[0] ?? '00'),
+                      int.parse(workHour.startTime?.split(':')[1] ?? '00'),
+                    ));
+
+                    Timestamp endTime = Timestamp.fromDate(DateTime(
+                      date.year,
+                      date.month,
+                      date.day,
+                      int.parse(workHour.endTime?.split(':')[0] ?? '00'),
+                      int.parse(workHour.endTime?.split(':')[1] ?? '00'),
+                    ));
+
+                    print('newEvent : ${name},${startTime},${endTime}');
+
+                    // 이벤트 Firestore에 추가를 배치에 추가
+                    DocumentReference docRef =
+                        fireStoreCalendar.product.doc(); // 새로운 문서 참조 생성
+                    batch.set(docRef, {
+                      'name': name,
+                      'start_time': startTime,
+                      'end_time': endTime,
+                    });
+                  }
+                }
+              }
+
               Navigator.of(context).pop(); // 다이얼로그 닫기
+              // 모든 배치 작업을 커밋합니다.
+              await batch.commit();
             },
           ),
         ],

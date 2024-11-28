@@ -93,6 +93,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final workerModel =
         Provider.of<WorkerModel>(context); // WorkerModel 인스턴스 가져오기
     final FireStoreCalendar fireStoreCalendar = FireStoreCalendar();
+    final FireStoreWorkers fireStoreWorkers = FireStoreWorkers();
 
     return Scaffold(
       appBar: AppBar(
@@ -232,7 +233,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     // 삭제 알림
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text("${event.name}가 삭제되었습니다."),
+                        content: Text("삭제되었습니다."),
                       ),
                     );
                   },

@@ -18,9 +18,17 @@ class FireStoreCalendar {
   CollectionReference product =
       FirebaseFirestore.instance.collection('calendar_events');
 
-  // Worker 삭제
+  // Future<void> addEvent(Event event) async {
+  //   await product.add({
+  //     'id' : '',
+  //     'name': event.name,
+  //     'startTime': Timestamp.fromDate(event.startTime),
+  //     'endTime': Timestamp.fromDate(event.endTime),
+  //   });
+  // }
+
+  // event 삭제
   Future<void> deleteEvent(String eventId) async {
-    //final DocumentSnapshot documentSnapshot = product_workers.snapshots()
     await product.doc(eventId).delete();
   }
 }
