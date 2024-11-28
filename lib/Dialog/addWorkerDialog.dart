@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:store_management_system/workers.dart';
+import 'package:store_management_system/Firebase/workers.dart';
 
 Future<void> addWorkerDialog(BuildContext context) async {
   FireStoreWorkers fireStoreWorkers = FireStoreWorkers(); // add 함수를 위한 인스턴스 생성
@@ -14,8 +14,6 @@ Future<void> addWorkerDialog(BuildContext context) async {
   String? selectedStartMin;
   String? selectedEndHour;
   String? selectedEndMin;
-
-  bool showWorkHoursInput = false; // 근무 시간 입력 UI 표시 여부
 
   return showDialog<void>(
     context: context,

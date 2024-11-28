@@ -2,18 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:store_management_system/worker_screen.dart';
-import 'package:store_management_system/workers.dart';
+import 'package:store_management_system/Dialog/addCalendarDialog.dart';
+import 'package:store_management_system/Firebase/calendar_events.dart';
+import 'package:store_management_system/Firebase/workers.dart';
+import 'package:store_management_system/Screen/worker.dart';
 import 'package:table_calendar/table_calendar.dart';
-
-class Event {
-  //각 evnet 객체 class
-  final String name;
-  final DateTime startTime;
-  final DateTime endTime;
-
-  Event({required this.name, required this.startTime, required this.endTime});
-}
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -43,6 +36,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         Timestamp startTime = doc['start_time'];
         Timestamp endTime = doc['end_time'];
         String name = doc['name'];
+        String id = doc.id;
 
         DateTime startDateTime = startTime.toDate();
         DateTime endDateTime = endTime.toDate();
@@ -50,8 +44,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
             startDateTime.day); //이벤트 추가될 날짜(년,월,일)
 
         //Event 객체 생성
-        Event event =
-            Event(name: name, startTime: startDateTime, endTime: endDateTime);
+        Event event = Event(
+            id: id, name: name, startTime: startDateTime, endTime: endDateTime);
 
         // 날짜에 이벤트 추가
         if (events[dateKey] == null) {
@@ -59,7 +53,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         }
         events[dateKey]!.add(event);
       }
-      setState(() {}); // 상태 업데이트
+      setState(() {
+        _selectedEvents = events[_selectedDay] ?? [];
+      }); // 상태 업데이트
 
       print(events);
     });
@@ -85,49 +81,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
         context, MaterialPageRoute(builder: (context) => WorkerManage()));
   }
 
-  void _showAddDialog() {
-    // 다이얼로그를 통해 이벤트 추가
-    showDialog(
-        context: context,
-        builder: (context) {
-          String title = '';
-          return AlertDialog(
-            title: Text('Add Work'),
-            content: TextField(
-              onChanged: (value) {
-                title = value;
-              },
-              decoration: InputDecoration(hintText: '이벤트 제목'),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('취소'),
-              ),
-              TextButton(
-                onPressed: () {
-                  //여기에 근무 추가하는 함수
-                  Navigator.of(context).pop();
-                },
-                child: Text('추가'),
-              ),
-            ],
-          );
-        });
-  }
-
   @override
   void initState() {
     super.initState();
     _getEvents();
+    _selectedEvents = events[_selectedDay] ?? [];
   }
 
   @override
   Widget build(BuildContext context) {
     final workerModel =
         Provider.of<WorkerModel>(context); // WorkerModel 인스턴스 가져오기
+    final FireStoreCalendar fireStoreCalendar = FireStoreCalendar();
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -234,7 +200,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 final event = _selectedEvents[index];
 
                 // event.name에 해당하는 Worker 객체 찾기
-                // event.name에 해당하는 Worker 객체 찾기
                 final worker = workerModel.workersList.firstWhere(
                   (worker) => worker.name == event.name,
                   orElse: () => Worker(
@@ -251,40 +216,60 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ? Color.fromARGB(255, 231, 109, 109)
                     : Color.fromARGB(255, 47, 113, 77);
 
-                return Container(
-                  margin: EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 16.0), // 마진 추가
-                  decoration: BoxDecoration(
-                    color: Colors.transparent, // 배경색
-                    border: Border.all(color: Colors.black), // 검정색 테두리
-                    borderRadius: BorderRadius.circular(10.0), // 라운딩 처리
+                return Dismissible(
+                  key: Key(event.id), // 고유한 키를 제공
+                  background: Container(
+                    color: Colors.red, // 슬라이드 시 나타나는 배경색
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Icon(Icons.delete, color: Colors.white), // 삭제 아이콘
                   ),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0), // 아이콘 주변 패딩
-                        child: Icon(Icons.person,
-                            size: 40.0,
-                            color: iconColor), // 사람 아이콘
+                  direction: DismissDirection.startToEnd, // 오른쪽에서 왼쪽으로 슬라이드
+                  onDismissed: (direction) {
+                    // 이벤트 삭제 처리
+                    fireStoreCalendar.deleteEvent(event.id);
+                    print('delete');
+                    // 삭제 알림
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("${event.name}가 삭제되었습니다."),
                       ),
-                      Expanded(
-                        child: ListTile(
-                          title:
-                              Text(event.name, style: TextStyle(fontSize: 16)),
-                          subtitle: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start, // 텍스트 정렬
-                            children: [
-                              Text(
-                                '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}',
-                              ),
-                              // 추가적인 텍스트
-                              Text('출퇴근 : '),
-                            ],
+                    );
+                  },
+                  child: Container(
+                    margin: EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16.0), // 마진 추가
+                    decoration: BoxDecoration(
+                      color: Colors.transparent, // 배경색
+                      border: Border.all(color: Colors.black), // 검정색 테두리
+                      borderRadius: BorderRadius.circular(10.0), // 라운딩 처리
+                    ),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0), // 아이콘 주변 패딩
+                          child: Icon(Icons.person,
+                              size: 40.0, color: iconColor), // 사람 아이콘
+                        ),
+                        Expanded(
+                          child: ListTile(
+                            title: Text(event.name,
+                                style: TextStyle(fontSize: 16)),
+                            subtitle: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start, // 텍스트 정렬
+                              children: [
+                                Text(
+                                  '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}',
+                                ),
+                                // 추가적인 텍스트
+                                Text('출퇴근 : '),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               },
@@ -293,7 +278,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddDialog,
+        onPressed: () async {
+          addCalendarDialog(context, _selectedDay);
+        },
         child: Icon(Icons.add),
       ),
     );

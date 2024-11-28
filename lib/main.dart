@@ -2,9 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
-import 'package:store_management_system/calendar.dart';
-import 'package:store_management_system/gpio.dart';
-import 'package:store_management_system/workers.dart';
+import 'package:store_management_system/Firebase/workers.dart';
+import 'package:store_management_system/Screen/calendar.dart';
+import 'package:store_management_system/Screen/gpio.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
