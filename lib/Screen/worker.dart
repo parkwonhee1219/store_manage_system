@@ -68,7 +68,7 @@ class _WorkerManageState extends State<WorkerManage> {
                       ),
                       IconButton(
                         icon: Icon(Icons.delete), // 삭제 아이콘
-                        onPressed: () async{
+                        onPressed: () async {
                           // 삭제 버튼 클릭 시의 동작 정의
                           await deleteAllEvents(data['name']);
                           fireStoreWorkers.deleteWorker(documentSnapshot.id);
@@ -98,11 +98,41 @@ class _WorkerManageState extends State<WorkerManage> {
     );
   }
 
-  void showSalaryDialog(BuildContext context, Map<String, dynamic> data) {
+  void showSalaryDialog(BuildContext context, Map<String, dynamic> data) async {
     int month = DateTime.now().month;
-    double SalaryNo33 =
-        (double.parse(data['monthlyHours'])) * (data['hourlyRate']);
-    double SalaryYes33 = SalaryNo33 - ((SalaryNo33) * (3.3 / 100));
+    double totalMinutes = 0.0; // 총 근무 시간을 분 단위로 저장할 변수
+    double totalHours = 0.0;
+
+    // 이번 달의 calendar_events 쿼리
+    final FireStoreCalendar fireStoreCalendar = FireStoreCalendar();
+    QuerySnapshot querySnapshot = await fireStoreCalendar.product
+        .where('name', isEqualTo: data['name'])
+        .get();
+
+    for (var doc in querySnapshot.docs) {
+      Map<String, dynamic> eventData = doc.data() as Map<String, dynamic>;
+
+      Event event = Event(
+        id: doc.id,
+        name: eventData['name'],
+        startTime: eventData['start_time'].toDate(),
+        endTime: eventData['end_time'].toDate(),
+      );
+
+      if (event.startTime.month == month) {
+        // 근무 시간 계산
+        Duration duration = event.endTime.difference(event.startTime);
+        totalMinutes += duration.inMinutes.toDouble(); // 총 근무 시간을 분 단위로 누적
+        print(totalMinutes);
+      }
+      totalHours = totalMinutes / 60;
+      print('totalHours : ${totalHours}');
+    }
+
+    // 급여 계산
+    num SalaryNo33 = totalHours * data['hourlyRate']; // 시급 계산 시 시간으로 변환
+    num SalaryYes33 = SalaryNo33 - (SalaryNo33 * (3.3 / 100));
+
     // 금액 형식화
     String formattedSalaryNo33 = NumberFormat('#,###,##0원').format(SalaryNo33);
     String formattedSalaryYes33 =
@@ -114,25 +144,26 @@ class _WorkerManageState extends State<WorkerManage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('${month}월 \'${data['name']}\' 급여'), // 다이얼로그 제목
+          title: Text('${month}월 \'${data['name']}\' 급여'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                ' ${data['duty33'] ? formattedSalaryYes33 : formattedSalaryNo33} ',
+                '${data['duty33'] ? formattedSalaryYes33 : formattedSalaryNo33}',
                 style: TextStyle(fontSize: 20),
               ),
               SizedBox(height: 20),
               Text('시급: ${formattedHourlyRate}'),
-              Text('총 근무 시간: ${data['monthlyHours']} 시간'),
-              Text('3.3% 세금 적용 (${data['duty33'] ? "O" : "X"})'), // duty33 값 표시
+              Text(
+                  '총 근무 시간: ${NumberFormat('0.00').format(totalHours)} 시간'), // 총 근무 시간 표시 (시 단위)
+              Text('3.3% 세금 적용 (${data['duty33'] ? "O" : "X"})'),
             ],
           ),
           actions: [
             TextButton(
-              child: Text('닫기'), // 닫기 버튼
+              child: Text('닫기'),
               onPressed: () {
-                Navigator.of(context).pop(); // 다이얼로그 닫기
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -142,28 +173,27 @@ class _WorkerManageState extends State<WorkerManage> {
   }
 
   Future<void> deleteAllEvents(String workerName) async {
-  final FireStoreCalendar fireStoreCalendar = FireStoreCalendar();
-  WriteBatch batch = FirebaseFirestore.instance.batch(); // Batch 객체 생성
+    final FireStoreCalendar fireStoreCalendar = FireStoreCalendar();
+    WriteBatch batch = FirebaseFirestore.instance.batch(); // Batch 객체 생성
 
-  // 해당 이름을 가진 모든 이벤트를 쿼리
-  QuerySnapshot querySnapshot = await fireStoreCalendar.product
-      .where('name', isEqualTo: workerName)
-      .get();
+    // 해당 이름을 가진 모든 이벤트를 쿼리
+    QuerySnapshot querySnapshot = await fireStoreCalendar.product
+        .where('name', isEqualTo: workerName)
+        .get();
 
-  // 각 문서를 삭제를 배치에 추가
-  for (var doc in querySnapshot.docs) {
-    batch.delete(fireStoreCalendar.product.doc(doc.id)); // 삭제 작업 추가
+    // 각 문서를 삭제를 배치에 추가
+    for (var doc in querySnapshot.docs) {
+      batch.delete(fireStoreCalendar.product.doc(doc.id)); // 삭제 작업 추가
+    }
+
+    // 배치 작업 커밋
+    await batch.commit();
+
+    // 삭제 알림
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("$workerName의 모든 정보가 삭제되었습니다."),
+      ),
+    );
   }
-
-  // 배치 작업 커밋
-  await batch.commit();
-
-  // 삭제 알림
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text("$workerName의 모든 이벤트가 삭제되었습니다."),
-    ),
-  );
-}
-
 }

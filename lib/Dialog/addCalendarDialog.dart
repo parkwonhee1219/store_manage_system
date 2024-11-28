@@ -139,7 +139,7 @@ Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async
                     DateTime now = DateTime.now();
                     DateTime startDateTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, 
                         int.parse(selectedStartHour!), int.parse(selectedStartMin!));
-                    DateTime endDateTime = DateTime(now.year, now.month, now.day, 
+                    DateTime endDateTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, 
                         int.parse(selectedEndHour!), int.parse(selectedEndMin!));
 
                     await fireStoreCalendar.product.add({

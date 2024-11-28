@@ -13,7 +13,7 @@ class WorkHours {
 class Worker {
   final String name; // 이름
   final List<WorkHours> fixedWorkHours; // 고정 근무 시간
-  final double monthlyHours; // 월별 누적 근무 시간
+  final num monthlyHours; // 월별 누적 근무 시간
   final int hourlyRate; // 시급
   final bool duty33; // 3.3% 세금 적용 여부
   final String gender;
@@ -63,7 +63,7 @@ class WorkerModel with ChangeNotifier {
         Worker worker = Worker(
           name: data['name'],
           fixedWorkHours: workHoursList,
-          monthlyHours: double.parse(data['monthlyHours']),
+          monthlyHours: data['monthlyHours'],
           hourlyRate: data['hourlyRate'],
           duty33: data['duty33'],
           gender: data['gender'],
@@ -100,7 +100,7 @@ class FireStoreWorkers {
                 'end_time': workhour.endTime,
               })
           .toList(),
-      'monthlyHours': worker.monthlyHours.toString(),
+      'monthlyHours': worker.monthlyHours,
       'hourlyRate': worker.hourlyRate,
       'duty33': worker.duty33,
       'gender': worker.gender,
@@ -124,7 +124,7 @@ class FireStoreWorkers {
                 'end_time': workhour.endTime,
               })
           .toList(),
-      'monthlyHours': updatedWorker.monthlyHours.toString(),
+      'monthlyHours': updatedWorker.monthlyHours,
       'hourlyRate': updatedWorker.hourlyRate,
       'duty33': updatedWorker.duty33,
       'gender': updatedWorker.gender,
