@@ -13,7 +13,8 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => WorkerModel()), //WorkerModel 인스턴스 생성
+        ChangeNotifierProvider(
+            create: (_) => WorkerModel()), //WorkerModel 인스턴스 생성
       ],
       child: MyApp(),
     ),
@@ -31,19 +32,28 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
           //colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          scaffoldBackgroundColor: Colors.white,
-          colorSchemeSeed: Colors.white,
+          //primarySwatch: customRedColor,
           //useMaterial3: true,
+          scaffoldBackgroundColor: Colors.white,
+          colorScheme: ColorScheme.light(
+            primary: Colors.black,
+            onPrimary: Colors.black,
+            secondary: Colors.white,
+            surface: Colors.white,
+            onSurface: Colors.black,
+          ),
+          //colorSchemeSeed: Colors.white,
+          //dropdownMenuTheme:DropdownMenuThemeData() ,
+          dialogBackgroundColor: Colors.white,
+          textTheme: TextTheme(),
           appBarTheme: AppBarTheme(
-              color: Colors.white,
-              // color: const Color.fromARGB(255, 41, 116, 99),
-              //color: const Color.fromARGB(255, 215, 66, 66),
-              titleTextStyle: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
-              //toolbarHeight: 50
-              ),
+            color: Colors.white,
+            // color: const Color.fromARGB(255, 41, 116, 99),
+            //color: const Color.fromARGB(255, 215, 66, 66),
+            titleTextStyle: TextStyle(
+                color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+            //toolbarHeight: 50
+          ),
           floatingActionButtonTheme: FloatingActionButtonThemeData(
               backgroundColor: const Color.fromARGB(255, 231, 109, 109),
               foregroundColor: Colors.white)),
@@ -51,6 +61,23 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+// const MaterialColor customRedColor = MaterialColor(
+//   0xFFFFFFFF, // 주 색상 (Hex)
+//   <int, Color>{
+//     0 : Color(0xFFFFFFFF),
+//     50: Color(0xFFFDE7E7), // 50% opacity
+//     100: Color(0xFFFAB8B8), // 100% opacity
+//     200: Color(0xFFE76D6D), // 200% opacity (주 색상)
+//     300: Color(0xFFD62B2B), // 300% opacity
+//     400: Color(0xFFC72B2B), // 400% opacity
+//     500: Color(0xFFA82A2A), // 500% opacity
+//     600: Color(0xFF931C1C), // 600% opacity
+//     700: Color(0xFF7D1515), // 700% opacity
+//     800: Color(0xFF691010), // 800% opacity
+//     900: Color(0xFF5B0C0C), // 900% opacity
+//   },
+// );
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});

@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class WorkHours {
-  final String day; // 요일 (예: "월요일")
-  final DateTime startTime; // 출근 시간 (예: "09:00")
-  final DateTime endTime; // 퇴근 시간 (예: "17:00")
+  String? day; // 요일 (예: "월요일")
+  String? startTime; // 출근 시간 (예: "09:00")
+  String? endTime; // 퇴근 시간 (예: "17:00")
 
   WorkHours(
       {required this.day, required this.startTime, required this.endTime});
@@ -28,6 +28,7 @@ class Worker {
   });
 }
 
+//FireStore 'Workers' Collection Read
 class WorkerModel with ChangeNotifier {
   List<Worker> _workersList = [];
   List<Worker> get workersList => _workersList;
@@ -46,14 +47,15 @@ class WorkerModel with ChangeNotifier {
 
       for (var doc in snapshot.docs) {
         var data = doc.data() as Map<String, dynamic>;
+        print('고정근무시간 : ${data['fixedWorkHours']}');
 
         // 고정 근무 시간을 리스트로 변환
         List<WorkHours> workHoursList =
             (data['fixedWorkHours'] as List<dynamic>).map((item) {
           return WorkHours(
             day: item['day'],
-            startTime: parseTime(item['start_time']), // 문자열을 DateTime으로 변환
-            endTime: parseTime(item['end_time']), // 문자열을 DateTime으로 변환
+            startTime: item['start_time'],
+            endTime: item['end_time'],
           );
         }).toList();
 
@@ -79,5 +81,53 @@ class WorkerModel with ChangeNotifier {
   DateTime parseTime(String time) {
     final parts = time.split(':');
     return DateTime(2000, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
+  }
+}
+
+//FireStore 'Workers' Collection Create, Update, Delete
+class FireStoreWorkers {
+  final CollectionReference product_workers =
+      FirebaseFirestore.instance.collection('workers');
+
+  // Worker 추가
+  Future<void> addWorker(Worker worker) async {
+    await product_workers.add({
+      'name': worker.name,
+      'fixedWorkHours': worker.fixedWorkHours
+          .map((workhour) => {
+                'day': workhour.day,
+                'start_time': workhour.startTime,
+                'end_time': workhour.endTime,
+              })
+          .toList(),
+      'monthlyHours': worker.monthlyHours.toString(),
+      'hourlyRate': worker.hourlyRate,
+      'duty33': worker.duty33,
+      'gender': worker.gender,
+    });
+  }
+
+  // Worker 삭제
+  Future<void> deleteWorker(String workerId) async {
+    //final DocumentSnapshot documentSnapshot = product_workers.snapshots()
+    await product_workers.doc(workerId).delete();
+  }
+
+  // Worker 수정
+  Future<void> updateWorker(String workerId, Worker updatedWorker) async {
+    await product_workers.doc(workerId).update({
+      'name': updatedWorker.name,
+      'fixedWorkHours': updatedWorker.fixedWorkHours
+          .map((workhour) => {
+                'day': workhour.day,
+                'start_time': workhour.startTime,
+                'end_time': workhour.endTime,
+              })
+          .toList(),
+      'monthlyHours': updatedWorker.monthlyHours.toString(),
+      'hourlyRate': updatedWorker.hourlyRate,
+      'duty33': updatedWorker.duty33,
+      'gender': updatedWorker.gender,
+    });
   }
 }

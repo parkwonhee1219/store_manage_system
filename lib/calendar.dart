@@ -92,7 +92,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         builder: (context) {
           String title = '';
           return AlertDialog(
-            title: Text('근무 추가'),
+            title: Text('Add Work'),
             content: TextField(
               onChanged: (value) {
                 title = value;
