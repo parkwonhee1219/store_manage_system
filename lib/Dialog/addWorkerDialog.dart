@@ -24,13 +24,14 @@ Future<void> addWorkerDialog(BuildContext context) async {
       return AlertDialog(
         backgroundColor: Colors.white,
         title: Center(
-          child: Text('New Worker'),
+          child: Text('New Worker',style: TextStyle(fontWeight: FontWeight.bold),),
         ),
         content: SingleChildScrollView(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextField(
                     controller: nameController,
@@ -82,11 +83,13 @@ Future<void> addWorkerDialog(BuildContext context) async {
                   // 근무 시간이 추가되면 기존 항목들 표시
                   ...fixedWorkHours.map((entry) {
                     return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           entry.day ?? '기본요일',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 15,
                             color: Color(0xFFD62B2B),
                           ),
                         ),
@@ -94,7 +97,7 @@ Future<void> addWorkerDialog(BuildContext context) async {
                         Text(
                           entry.startTime ?? '00:00',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 15,
                             color: Color(0xFFD62B2B),
                           ),
                         ),
@@ -105,7 +108,7 @@ Future<void> addWorkerDialog(BuildContext context) async {
                         Text(
                           entry.endTime ?? '00:00',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 15,
                             color: Color(0xFFD62B2B),
                           ),
                         ),
@@ -145,9 +148,11 @@ Future<void> addWorkerDialog(BuildContext context) async {
                       ),
                       SizedBox(width: 5), // 줄바꿈 추가
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            '출근 시간 : ',
+                            '출근 : ',
                           ),
                           DropdownButton<String>(
                             dropdownColor: Colors.white,
@@ -177,8 +182,10 @@ Future<void> addWorkerDialog(BuildContext context) async {
                                 selectedStartMin = newValue;
                               });
                             },
-                            items: List.generate(60,
-                                    (index) => index.toString().padLeft(2, '0'))
+                            items: List.generate(
+                                    6,
+                                    (index) =>
+                                        (index * 10).toString().padLeft(2, '0'))
                                 .map<DropdownMenuItem<String>>((String min) {
                               return DropdownMenuItem<String>(
                                 value: min,
@@ -190,9 +197,11 @@ Future<void> addWorkerDialog(BuildContext context) async {
                       ),
 
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            '퇴근 시간 : ',
+                            '퇴근 : ',
                           ),
                           DropdownButton<String>(
                             dropdownColor: Colors.white,
@@ -222,8 +231,10 @@ Future<void> addWorkerDialog(BuildContext context) async {
                                 selectedEndMin = newValue;
                               });
                             },
-                            items: List.generate(60,
-                                    (index) => index.toString().padLeft(2, '0'))
+                            items: List.generate(
+                                    6,
+                                    (index) =>
+                                        (index * 10).toString().padLeft(2, '0'))
                                 .map<DropdownMenuItem<String>>((String min) {
                               return DropdownMenuItem<String>(
                                 value: min,

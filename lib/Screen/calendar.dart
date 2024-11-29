@@ -166,7 +166,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           width: 7.0,
                           height: 7.0,
                           decoration: const BoxDecoration(
-                            color: Color.fromARGB(255, 47, 113, 77),
+                            // color: Color.fromARGB(255, 47, 113, 77),
+                            color: Colors.black,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -220,7 +221,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 return Dismissible(
                   key: Key(event.id), // 고유한 키를 제공
                   background: Container(
-                    color: Colors.red, // 슬라이드 시 나타나는 배경색
+                    color: Color.fromARGB(255, 231, 109, 109), // 슬라이드 시 나타나는 배경색
                     alignment: Alignment.centerLeft,
                     padding: EdgeInsets.symmetric(horizontal: 20.0),
                     child: Icon(Icons.delete, color: Colors.white), // 삭제 아이콘

@@ -70,8 +70,37 @@ class _WorkerManageState extends State<WorkerManage> {
                         icon: Icon(Icons.delete), // 삭제 아이콘
                         onPressed: () async {
                           // 삭제 버튼 클릭 시의 동작 정의
-                          await deleteAllEvents(data['name']);
-                          fireStoreWorkers.deleteWorker(documentSnapshot.id);
+                          showDialog<void>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text(
+                                  'Delete Worker',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                content:
+                                    Text('${data['name']}님의 모든 정보를 삭제하시겠습니까?'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                                    },
+                                    child: Text('취소'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                                      fireStoreWorkers
+                                          .deleteWorker(documentSnapshot.id);
+                                      await deleteAllEvents(data['name']);
+                                      
+                                    },
+                                    child: Text('삭제'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
                         },
                       ),
                     ],
@@ -136,9 +165,9 @@ class _WorkerManageState extends State<WorkerManage> {
     // 금액 형식화
     String formattedSalaryNo33 = NumberFormat('#,###,##0원').format(SalaryNo33);
     String formattedSalaryYes33 =
-        NumberFormat('#,###,##0원').format(SalaryYes33);
+        NumberFormat('#,###,##0 원').format(SalaryYes33);
     String formattedHourlyRate =
-        NumberFormat('#,###,##0원').format(data['hourlyRate']);
+        NumberFormat('#,###,##0 원').format(data['hourlyRate']);
 
     showDialog(
       context: context,
@@ -146,11 +175,13 @@ class _WorkerManageState extends State<WorkerManage> {
         return AlertDialog(
           title: Text('${month}월 \'${data['name']}\' 급여'),
           content: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 '${data['duty33'] ? formattedSalaryYes33 : formattedSalaryNo33}',
-                style: TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color:Color(0xFFD62B2B) ),
               ),
               SizedBox(height: 20),
               Text('시급: ${formattedHourlyRate}'),
@@ -172,6 +203,7 @@ class _WorkerManageState extends State<WorkerManage> {
     );
   }
 
+
   Future<void> deleteAllEvents(String workerName) async {
     final FireStoreCalendar fireStoreCalendar = FireStoreCalendar();
     WriteBatch batch = FirebaseFirestore.instance.batch(); // Batch 객체 생성
@@ -192,7 +224,7 @@ class _WorkerManageState extends State<WorkerManage> {
     // 삭제 알림
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("$workerName의 모든 정보가 삭제되었습니다."),
+        content: Text("$workerName님의 모든 정보가 삭제되었습니다."),
       ),
     );
   }

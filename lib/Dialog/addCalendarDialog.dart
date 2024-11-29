@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:store_management_system/Firebase/calendar_events.dart';
 import 'package:store_management_system/Firebase/workers.dart';
 
-Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async {
+Future<void> addCalendarDialog(
+    BuildContext context, DateTime selectedDay) async {
   String selectedWorkerName = '';
   String? selectedStartHour;
   String? selectedStartMin;
@@ -21,13 +22,14 @@ Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async
           final workerModel = Provider.of<WorkerModel>(context);
 
           return AlertDialog(
-            title: Text('Add Work'),
+            title: Text('Add Work',style: TextStyle(fontWeight: FontWeight.bold),),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButton<String>(
-                  hint: Text('근무자 선택'),
-                  value: selectedWorkerName.isNotEmpty ? selectedWorkerName : null,
+                  hint: Text('Select Worker'),
+                  value:
+                      selectedWorkerName.isNotEmpty ? selectedWorkerName : null,
                   onChanged: (String? newValue) {
                     setState(() {
                       selectedWorkerName = newValue!;
@@ -41,8 +43,10 @@ Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async
                   }).toList(),
                 ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('출근 시간 : '),
+                    Text('출근 : '),
                     DropdownButton<String>(
                       dropdownColor: Colors.white,
                       hint: Text('(시)'),
@@ -52,7 +56,8 @@ Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async
                           selectedStartHour = newValue;
                         });
                       },
-                      items: List.generate(24, (index) => index.toString().padLeft(2, '0'))
+                      items: List.generate(
+                              24, (index) => index.toString().padLeft(2, '0'))
                           .map<DropdownMenuItem<String>>((String hour) {
                         return DropdownMenuItem<String>(
                           value: hour,
@@ -70,7 +75,10 @@ Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async
                           selectedStartMin = newValue;
                         });
                       },
-                      items: List.generate(60, (index) => index.toString().padLeft(2, '0'))
+                      items: List.generate(
+                              6,
+                                    (index) =>
+                                        (index * 10).toString().padLeft(2, '0'))
                           .map<DropdownMenuItem<String>>((String min) {
                         return DropdownMenuItem<String>(
                           value: min,
@@ -81,8 +89,10 @@ Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async
                   ],
                 ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('퇴근 시간 : '),
+                    Text('퇴근 : '),
                     DropdownButton<String>(
                       dropdownColor: Colors.white,
                       hint: Text('(시)'),
@@ -92,7 +102,8 @@ Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async
                           selectedEndHour = newValue;
                         });
                       },
-                      items: List.generate(24, (index) => index.toString().padLeft(2, '0'))
+                      items: List.generate(
+                              24, (index) => index.toString().padLeft(2, '0'))
                           .map<DropdownMenuItem<String>>((String hour) {
                         return DropdownMenuItem<String>(
                           value: hour,
@@ -110,7 +121,10 @@ Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async
                           selectedEndMin = newValue;
                         });
                       },
-                      items: List.generate(60, (index) => index.toString().padLeft(2, '0'))
+                      items: List.generate(
+                              6,
+                              (index) =>
+                                  (index * 10).toString().padLeft(2, '0'))
                           .map<DropdownMenuItem<String>>((String min) {
                         return DropdownMenuItem<String>(
                           value: min,
@@ -132,18 +146,27 @@ Future<void> addCalendarDialog(BuildContext context, DateTime selectedDay) async
               TextButton(
                 onPressed: () async {
                   if (selectedWorkerName.isNotEmpty &&
-                      selectedStartHour != null && selectedStartMin != null &&
-                      selectedEndHour != null && selectedEndMin != null) {
-                    
+                      selectedStartHour != null &&
+                      selectedStartMin != null &&
+                      selectedEndHour != null &&
+                      selectedEndMin != null) {
                     // Firestore에 저장할 DateTime 객체 생성
                     DateTime now = DateTime.now();
-                    DateTime startDateTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, 
-                        int.parse(selectedStartHour!), int.parse(selectedStartMin!));
-                    DateTime endDateTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, 
-                        int.parse(selectedEndHour!), int.parse(selectedEndMin!));
+                    DateTime startDateTime = DateTime(
+                        selectedDay.year,
+                        selectedDay.month,
+                        selectedDay.day,
+                        int.parse(selectedStartHour!),
+                        int.parse(selectedStartMin!));
+                    DateTime endDateTime = DateTime(
+                        selectedDay.year,
+                        selectedDay.month,
+                        selectedDay.day,
+                        int.parse(selectedEndHour!),
+                        int.parse(selectedEndMin!));
 
                     await fireStoreCalendar.product.add({
-                      'id' : '',
+                      'id': '',
                       'name': selectedWorkerName,
                       'start_time': Timestamp.fromDate(startDateTime),
                       'end_time': Timestamp.fromDate(endDateTime),
