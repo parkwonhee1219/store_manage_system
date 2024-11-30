@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="store_management_system"
+        android:label="마이스토어"
         android:name="${applicationName}"
         android:icon="@mipmap/laucher_icon">
         <activity

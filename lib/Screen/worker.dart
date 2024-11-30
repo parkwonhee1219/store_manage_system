@@ -146,6 +146,8 @@ class _WorkerManageState extends State<WorkerManage> {
         name: eventData['name'],
         startTime: eventData['start_time'].toDate(),
         endTime: eventData['end_time'].toDate(),
+        realStart: eventData['real_start'].toDate(),
+        realEnd: eventData['real_end'].toDate()
       );
 
       if (event.startTime.month == month) {

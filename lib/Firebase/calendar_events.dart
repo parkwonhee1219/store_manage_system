@@ -6,12 +6,16 @@ class Event {
   final String name;
   final DateTime startTime;
   final DateTime endTime;
+  final DateTime realStart;
+  final DateTime realEnd;
 
   Event(
       {required this.id,
       required this.name,
       required this.startTime,
-      required this.endTime});
+      required this.endTime,
+      required this.realStart,
+      required this.realEnd});
 }
 
 class FireStoreCalendar {

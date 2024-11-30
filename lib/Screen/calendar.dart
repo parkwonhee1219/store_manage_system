@@ -37,15 +37,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
         Timestamp endTime = doc['end_time'];
         String name = doc['name'];
         String id = doc.id;
+        Timestamp realStart = doc['real_start'];
+        Timestamp realEnd = doc['real_end'];
 
         DateTime startDateTime = startTime.toDate();
         DateTime endDateTime = endTime.toDate();
         DateTime dateKey = DateTime.utc(startDateTime.year, startDateTime.month,
             startDateTime.day); //이벤트 추가될 날짜(년,월,일)
+        DateTime realStartToDate = realStart.toDate();
+        DateTime realEndToDate = realEnd.toDate();
 
         //Event 객체 생성
         Event event = Event(
-            id: id, name: name, startTime: startDateTime, endTime: endDateTime);
+            id: id,
+            name: name,
+            startTime: startDateTime,
+            endTime: endDateTime,
+            realStart: realStartToDate,
+            realEnd: realEndToDate);
 
         // 날짜에 이벤트 추가
         if (events[dateKey] == null) {
@@ -167,7 +176,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           height: 7.0,
                           decoration: const BoxDecoration(
                             // color: Color.fromARGB(255, 47, 113, 77),
-                            color: Colors.black,
+                            color: Color.fromARGB(255, 125, 125, 125),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -221,7 +230,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 return Dismissible(
                   key: Key(event.id), // 고유한 키를 제공
                   background: Container(
-                    color: Color.fromARGB(255, 231, 109, 109), // 슬라이드 시 나타나는 배경색
+                    color:
+                        Color.fromARGB(255, 231, 109, 109), // 슬라이드 시 나타나는 배경색
                     alignment: Alignment.centerLeft,
                     padding: EdgeInsets.symmetric(horizontal: 20.0),
                     child: Icon(Icons.delete, color: Colors.white), // 삭제 아이콘
@@ -265,7 +275,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}',
                                 ),
                                 // 추가적인 텍스트
-                                Text('출퇴근 : '),
+                                Text(
+                                    '출퇴근 : ${DateFormat("HH:mm").format(event.realStart)} - ${DateFormat('HH:mm').format(event.realEnd)}'),
                               ],
                             ),
                           ),

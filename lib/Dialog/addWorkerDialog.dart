@@ -357,6 +357,22 @@ Future<void> addWorkerDialog(BuildContext context) async {
                       int.parse(workHour.endTime?.split(':')[1] ?? '00'),
                     ));
 
+                    Timestamp realStart = Timestamp.fromDate(DateTime(
+                      date.year,
+                      date.month,
+                      date.day,
+                      00,
+                      00,
+                    ));
+
+                    Timestamp realEnd = Timestamp.fromDate(DateTime(
+                      date.year,
+                      date.month,
+                      date.day,
+                      00,
+                      00,
+                    ));
+
                     print('newEvent : ${name},${startTime},${endTime}');
 
                     // 이벤트 Firestore에 추가를 배치에 추가
@@ -366,6 +382,8 @@ Future<void> addWorkerDialog(BuildContext context) async {
                       'name': name,
                       'start_time': startTime,
                       'end_time': endTime,
+                      'real_start' : realStart,
+                      'real_end' : realEnd
                     });
                   }
                 }
