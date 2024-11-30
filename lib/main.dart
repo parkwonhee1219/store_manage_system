@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:store_management_system/Firebase/workers.dart';
 import 'package:store_management_system/Screen/calendar.dart';
 import 'package:store_management_system/Screen/gpio.dart';
+import 'package:store_management_system/Screen/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,7 +58,7 @@ class MyApp extends StatelessWidget {
           floatingActionButtonTheme: FloatingActionButtonThemeData(
               backgroundColor: const Color.fromARGB(255, 231, 109, 109),
               foregroundColor: Colors.white)),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: LoginScreen(),
     );
   }
 }
