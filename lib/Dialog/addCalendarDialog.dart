@@ -164,12 +164,28 @@ Future<void> addCalendarDialog(
                         selectedDay.day,
                         int.parse(selectedEndHour!),
                         int.parse(selectedEndMin!));
+                    DateTime realStartToDate = DateTime(
+                        selectedDay.year,
+                        selectedDay.month,
+                        selectedDay.day,
+                        00,
+                        00
+                       );
+                    DateTime realEndToDate = DateTime(
+                        selectedDay.year,
+                        selectedDay.month,
+                        selectedDay.day,
+                        00 ,
+                        00
+                       );
 
                     await fireStoreCalendar.product.add({
                       'id': '',
                       'name': selectedWorkerName,
                       'start_time': Timestamp.fromDate(startDateTime),
                       'end_time': Timestamp.fromDate(endDateTime),
+                      'real_start' : Timestamp.fromDate(realStartToDate),
+                      'real_end' : Timestamp.fromDate(realEndToDate)
                     });
 
                     Navigator.of(context).pop();

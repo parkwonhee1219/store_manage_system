@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:store_management_system/Screen/bottom.dart';
+import 'package:store_management_system/Screen/qr.dart';
 import 'package:store_management_system/Screen/singup.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -51,10 +52,21 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // 로그인 성공 후 다음 화면으로 이동
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+      if (userData['position'] == '사장님') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen(userDoc : userDoc)),
+        );
+      } else if (userData['position']=='알바생'){
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => QrScreen(userDoc : userDoc)),
+        );
+      } else{
+        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('로그인 중 오류 발생')),
       );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('로그인 중 오류 발생: $e')),
@@ -90,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     TextField(
                       controller: _idController,
-                      decoration: InputDecoration(labelText: '사용자 이름'),
+                      decoration: InputDecoration(labelText: 'ID'),
                     ),
                     SizedBox(height: 20),
                     TextField(

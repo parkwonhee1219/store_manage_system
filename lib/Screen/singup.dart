@@ -81,6 +81,7 @@ class _SignUpPageState extends State<SignUpPage> {
         'name': name,
         'store': _selectedStore,
         'position': _selectedPosition,
+        'token' : ''
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
