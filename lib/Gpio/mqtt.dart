@@ -6,7 +6,7 @@ import 'package:store_management_system/Gpio/device_controller.dart';
 class Mqtt {
   final client = MqttServerClient('broker.hivemq.com', '');
 
-  Future<void> connect(String topic) async {
+  Future<void> connect(String topic,String token) async {
     client.port = 1883;
     client.logging(on: true);
     client.keepAlivePeriod = 20;
@@ -33,8 +33,8 @@ class Mqtt {
       print('Exception: $e');
       client.disconnect();
     }
-    //subscribeToTopic(topic);
-    //publishMessage(topic, 'connect success!!!!!!');
+    subscribeToTopic(topic,'');
+    publishMessage(topic, 'connect success!!!!!!');
     print('connect finish!!!!!!!!!');
   }
 
@@ -61,7 +61,7 @@ class Mqtt {
   void subscribeToTopic(String topic, String token) {
     if (client.connectionStatus!.state != MqttConnectionState.connected) {
       print('Client is not connected. Trying to reconnect...');
-      connect(topic); // 연결이 안 되어 있으면 재연결 시도
+      connect(topic,''); // 연결이 안 되어 있으면 재연결 시도
     }
 
     //'topic'을 구독하고 구독한 주제로부터 받은 메세지를 출력하는 메서드.
@@ -97,7 +97,7 @@ class Mqtt {
   void publishMessage(String topic, String message) {
     if (client.connectionStatus!.state != MqttConnectionState.connected) {
       print('Client is not connected. Trying to reconnect...');
-      connect(topic); // 연결이 안 되어 있으면 재연결 시도
+      connect(topic,''); // 연결이 안 되어 있으면 재연결 시도
     }
 
     //특정 주제로 메세지를 발행하는 메서드
